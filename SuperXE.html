@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Супер-Калькулятор ХЕ</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f1f5f9; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #1e293b; }
+        .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); box-sizing: border-box; }
+        h2, h3 { margin-top: 0; color: #0f172a; text-align: center; }
+        h3 { font-size: 18px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .input-group { margin-bottom: 16px; position: relative; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; transition: all 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        
+        .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+        .category-btn { padding: 8px 4px; background: #cbd5e1; border: 1px solid #94a3b8; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: #1e293b; }
+        .category-btn:hover, .category-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        
+        .suggestions { position: absolute; width: 100%; background: white; border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; max-height: 180px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; box-sizing: border-box; }
+        .suggestion-item { padding: 12px; cursor: pointer; font-size: 15px; border-bottom: 1px solid #f1f5f9; }
+        .suggestion-item:hover { background: #f8fafc; color: #3b82f6; }
+        
+        .carbs-preview { font-size: 13px; color: #0284c7; font-weight: 500; margin-top: 4px; display: none; }
+        
+        .gi-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; margin-left: 6px; }
+        .gi-fast { background-color: #ef4444; }
+        .gi-medium { background-color: #eab308; }
+        .gi-slow { background-color: #22c55e; }
+        
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #2563eb; }
+        button.secondary { background: #10b981; margin-top: 10px; }
+        button.secondary:hover { background: #059669; }
+        
+        .live-result { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 16px; font-weight: 500; }
+        .meal-list { list-style: none; padding: 0; margin: 0 0 16px 0; max-height: 200px; overflow-y: auto; }
+        .meal-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
+        .remove-btn { background: none; color: #ef4444; border: none; width: auto; padding: 0 8px; cursor: pointer; font-size: 18px; }
+        .remove-btn:hover { color: #dc2626; }
+        .total-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 10px; text-align: center; }
+        .total-val { font-size: 32px; font-weight: 800; color: #1d4ed8; }
+        
+        .backup-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; border-top: 1px dashed #cbd5e1; padding-top: 16px; }
+        .btn-backup { font-size: 13px; padding: 8px; background: #64748b; }
+        .btn-backup:hover { background: #475569; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Расчет приема пищи</h2>
+        <label>Быстрый выбор категории</label>
+        <div class="categories-grid">
+            <button class="category-btn" onclick="filterByCategory('гарниры')">🍚 Каши</button>
+            <button class="category-btn" onclick="filterByCategory('хлеб')">🍞 Хлеб</button>
+            <button class="category-btn" onclick="filterByCategory('фрукты')">🍏 Фрукты</button>
+            <button class="category-btn" onclick="filterByCategory('овощи')">🥕 Овощи</button>
+            <button class="category-btn" onclick="filterByCategory('сладости')">🍩 Сладости</button>
+            <button class="category-btn" onclick="filterByCategory('молоко')">🥛 Молочное</button>
+        </div>
+        
+        <div class="input-group">
+            <label for="name">Название продукта</label>
+            <input type="text" id="name" placeholder="Или начните вводить название вручную..." autocomplete="off">
+            <div id="suggestions" class="suggestions"></div>
+            <div id="carbs-preview" class="carbs-preview"></div>
+        </div>
+        <div class="input-group">
+            <label for="weight">Вес порции (грамм)</label>
+            <input type="number" id="weight" placeholder="Введите вес">
+        </div>
+        <div class="live-result">Текущий продукт: <span id="live-xe">0.00</span> ХЕ</div>
+        <button id="add-to-meal">➕ Добавить в прием пищи</button>
+    </div>
+
+    <div class="card">
+        <h3>Текущий обед / завтрак</h3>
+        <ul id="meal-list" class="meal-list"></ul>
+        <div class="total-box">
+            <div>ВСЕГО НА ПРИЕМ ПИЩИ:</div>
+            <div class="total-val"><span id="total-xe">0.00</span> ХЕ</div>
+        </div>
+        <button id="clear-meal" class="secondary" style="background: #64748b;">🗑️ Очистить весь прием пищи</button>
+    </div>
+
+    <div class="card" style="border-top: 4px solid #10b981;">
+        <h3>➕ Добавить свой продукт / рецепт</h3>
+        <div class="input-group">
+            <label for="new-name">Название (например: Мой сырник)</label>
+            <input type="text" id="new-name" placeholder="Введите название">
+        </div>
+        <div class="input-group">
+            <label for="new-category">Категория</label>
+            <select id="new-category">
+                <option value="сладости">Сладости / Десерты</option>
+                <option value="гарниры">Гарниры / Каши</option>
+                <option value="фрукты">Фрукты / Ягоды</option>
+                <option value="овощи">Овощи / Сухофрукты</option>
+                <option value="хлеб">Хлеб / Выпечка</option>
+                <option value="молоко">Молочные продукты</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="new-carbs">Углеводы на 100 г готового блюда</label>
+            <input type="number" id="new-carbs" placeholder="г углеводов" step="0.1">
+        </div>
+        <div class="input-group">
+            <label for="new-gi">Скорость всасывания (ГИ)</label>
+            <select id="new-gi">
+                <option value="slow">🐢 Медленная (ГИ до 55)</option>
+                <option value="medium">🟡 Средняя (ГИ 56-69)</option>
+                <option value="fast">⚡ Быстрая (ГИ 70+)</option>
+            </select>
+        </div>
+        <button id="save-product" class="secondary">Сохранить в мою базу</button>
+
+        <!-- Зона резервного копирования файла -->
+        <div class="backup-zone">
+            <button id="export-db" class="btn-backup">📤 Выгрузить базу</button>
+            <button id="import-trigger" class="btn-backup">📥 Загрузить базу</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+    </div>
+</div>
+<script>
+    const defaultDatabase = [
+        { name: "Гречка отварная", carbs: 25.7, cat: "гарниры", gi: "slow" },
+        { name: "Рис отварной белый", carbs: 24.9, cat: "гарниры", gi: "fast" },
+        { name: "Рис бурый отварной", carbs: 23.0, cat: "гарниры", gi: "slow" },
+        { name: "Макароны отварные", carbs: 23.0, cat: "гарниры", gi: "slow" },
+        { name: "Пюре картофельное", carbs: 15.0, cat: "гарниры", gi: "fast" },
+        { name: "Картофель отварной", carbs: 16.3, cat: "гарниры", gi: "medium" },
+        { name: "Картофель запеченный", carbs: 21.0, cat: "гарниры", gi: "fast" },
+        { name: "Овсяная каша на молоке", carbs: 15.0, cat: "гарниры", gi: "medium" },
+        { name: "Овсяная каша на воде", carbs: 12.0, cat: "гарниры", gi: "slow" },
+        { name: "Пшенная каша отварная", carbs: 23.0, cat: "гарниры", gi: "medium" },
+        { name: "Перловая каша отварная", carbs: 22.0, cat: "гарниры", gi: "slow" },
+        { name: "Кускус отварной", carbs: 21.8, cat: "гарниры", gi: "medium" },
+        { name: "Булгур отварной", carbs: 18.6, cat: "гарниры", gi: "slow" },
+        { name: "Хлеб пшеничный (белый)", carbs: 48.0, cat: "хлеб", gi: "fast" },
+        { name: "Хлеб ржаной (черный)", carbs: 40.0, cat: "хлеб", gi: "slow" },
+        { name: "Хлеб бородинский", carbs: 42.0, cat: "хлеб", gi: "medium" },
+        { name: "Лаваш армянский тонкий", carbs: 48.0, cat: "хлеб", gi: "fast" },
+        { name: "Батон нарезной", carbs: 50.0, cat: "хлеб", gi: "fast" },
+        { name: "Хлебцы цельнозерновые", carbs: 61.0, cat: "хлеб", gi: "medium" },
+        { name: "Сушки / Баранки", carbs: 68.0, cat: "хлеб", gi: "fast" },
+        { name: "Блины классические", carbs: 30.0, cat: "хлеб", gi: "medium" },
+        { name: "Пирожок с капустой", carbs: 41.0, cat: "хлеб", gi: "medium" },
+        { name: "Круассан классический", carbs: 46.0, cat: "хлеб", gi: "fast" },
+        { name: "Сахар-песок / Рафинад", carbs: 99.8, cat: "сладости", gi: "fast" },
+        { name: "Мед натуральный", carbs: 80.3, cat: "сладости", gi: "fast" },
+        { name: "Шоколад молочный", carbs: 52.4, cat: "сладости", gi: "medium" },
+        { name: "Шоколад горький (75%+)", carbs: 32.0, cat: "сладости", gi: "slow" },
+        { name: "Конфеты шоколадные", carbs: 60.0, cat: "сладости", gi: "fast" },
+        { name: "Зефир белый", carbs: 78.5, cat: "сладости", gi: "fast" },
+        { name: "Мармелад", carbs: 77.0, cat: "сладости", gi: "fast" },
+        { name: "Мороженое пломбир", carbs: 20.0, cat: "сладости", gi: "slow" },
+        { name: "Печенье овсяное", carbs: 65.0, cat: "сладости", gi: "medium" },
+        { name: "Чипсы картофельные", carbs: 53.0, cat: "сладости", gi: "fast" },
+        { name: "Яблоко", carbs: 10.3, cat: "фрукты", gi: "slow" },
+        { name: "Банан", carbs: 21.0, cat: "фрукты", gi: "medium" },
+        { name: "Груша", carbs: 10.9, cat: "фрукты", gi: "slow" },
+        { name: "Апельсин", carbs: 8.1, cat: "фрукты", gi: "slow" },
+        { name: "Мандарин", carbs: 7.5, cat: "фрукты", gi: "medium" },
+        { name: "Виноград", carbs: 16.0, cat: "фрукты", gi: "medium" },
+        { name: "Персик", carbs: 9.5, cat: "фрукты", gi: "slow" },
+        { name: "Киви", carbs: 10.0, cat: "фрукты", gi: "medium" },
+        { name: "Ананас", carbs: 11.5, cat: "фрукты", gi: "medium" },
+        { name: "Хурма", carbs: 15.2, cat: "фрукты", gi: "medium" },
+        { name: "Клубника", carbs: 7.5, cat: "фрукты", gi: "slow" },
+        { name: "Малина", carbs: 8.3, cat: "фрукты", gi: "slow" },
+        { name: "Арбуз", carbs: 5.8, cat: "фрукты", gi: "fast" },
+        { name: "Дыня", carbs: 7.4, cat: "фрукты", gi: "medium" },
+        { name: "Морковь сырая", carbs: 6.9, cat: "овощи", gi: "slow" },
+        { name: "Свекла отварная", carbs: 10.8, cat: "овощи", gi: "medium" },
+        { name: "Помидор", carbs: 3.8, cat: "овощи", gi: "slow" },
+        { name: "Огурец свежий", carbs: 2.5, cat: "овощи", gi: "slow" },
+        { name: "Перец болгарский", carbs: 5.3, cat: "овощи", gi: "slow" },
+        { name: "Кукуруза консервированная", carbs: 14.5, cat: "овощи", gi: "medium" },
+        { name: "Изюм", carbs: 66.0, cat: "овощи", gi: "medium" },
+        { name: "Курага", carbs: 51.0, cat: "овощи", gi: "slow" },
+        { name: "Молоко 2.5% / 3.2%", carbs: 4.7, cat: "молоко", gi: "slow" },
+        { name: "Кефир", carbs: 4.0, cat: "молоко", gi: "slow" },
+        { name: "Йогурт питьевой сладкий", carbs: 11.5, cat: "молоко", gi: "medium" },
+        { name: "Сырок глазированный", carbs: 33.0, cat: "молоко", gi: "medium" },
+        { name: "Сок яблочный", carbs: 11.5, cat: "молоко", gi: "fast" },
+        { name: "Кока-Кола (классическая)", carbs: 10.4, cat: "молоко", gi: "fast" }
+    ];
+
+    const CARB_PER_XE = 12;
+    let customDatabase = JSON.parse(localStorage.getItem('customFoodDb')) || [];
+    
+    function getFullDatabase() {
+        return [...defaultDatabase, ...customDatabase];
+    }
+
+    const labelsGI = { 
+        slow: {text: "🐢 Медленный (1-2 ч)", class: "gi-slow"}, 
+        medium: {text: "🟡 Средний (30-60 мин)", class: "gi-medium"}, 
+        fast: {text: "⚡ Быстрый (15-30 мин)", class: "gi-fast"} 
+    };
+
+    const nameInput = document.getElementById('name');
+    const weightInput = document.getElementById('weight');
+    const suggestionsContainer = document.getElementById('suggestions');
+    const carbsPreview = document.getElementById('carbs-preview');
+    const liveXeSpan = document.getElementById('live-xe');
+    const mealListContainer = document.getElementById('meal-list');
+    const totalXeSpan = document.getElementById('total-xe');
+    
+    const newNameInput = document.getElementById('new-name');
+    const newCategorySelect = document.getElementById('new-category');
+    const newCarbsInput = document.getElementById('new-carbs');
+    const newGiSelect = document.getElementById('new-gi');
+
+    let currentCarbs = 0;
+    let currentGI = 'slow';
+    let currentMeal = [];
+    function updateLiveXE() {
+        const weight = parseFloat(weightInput.value) || 0;
+        if (currentCarbs > 0 && weight > 0) {
+            const xe = (currentCarbs * weight) / 100 / CARB_PER_XE;
+            liveXeSpan.textContent = xe.toFixed(2);
+        } else {
+            liveXeSpan.textContent = "0.00";
+        }
+    }
+
+    weightInput.addEventListener('input', updateLiveXE);
+
+    function showFilteredSuggestions(filtered) {
+        suggestionsContainer.innerHTML = '';
+        if (filtered.length > 0) {
+            suggestionsContainer.style.display = 'block';
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                
+                const badge = document.createElement('span');
+                badge.className = `gi-badge ${labelsGI[item.gi].class}`;
+                badge.textContent = item.gi === 'slow' ? '🐢' : item.gi === 'medium' ? '🟡' : '⚡';
+                
+                div.textContent = item.name + (customDatabase.some(c => c.name === item.name) ? ' ⭐' : ' ');
+                div.appendChild(badge);
+                
+                div.addEventListener('click', () => {
+                    nameInput.value = item.name;
+                    currentCarbs = item.carbs;
+                    currentGI = item.gi;
+                    carbsPreview.innerHTML = `Углеводов: ${item.carbs}г на 100г | Всасывание: <b>${labelsGI[item.gi].text}</b>`;
+                    carbsPreview.style.display = 'block';
+                    suggestionsContainer.style.display = 'none';
+                    updateLiveXE();
+                });
+                suggestionsContainer.appendChild(div);
+            });
+        } else {
+            suggestionsContainer.style.display = 'block';
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.style.color = '#64748b';
+            div.textContent = "Ничего не найдено";
+            suggestionsContainer.appendChild(div);
+            carbsPreview.style.display = 'none';
+            currentCarbs = 0;
+            updateLiveXE();
+        }
+    }
+
+    window.filterByCategory = function(categoryCode) {
+        const filtered = getFullDatabase().filter(item => item.cat === categoryCode);
+        showFilteredSuggestions(filtered);
+    };
+
+    nameInput.addEventListener('input', () => {
+        const query = nameInput.value.toLowerCase().trim();
+        if (!query) {
+            suggestionsContainer.style.display = 'none';
+            carbsPreview.style.display = 'none';
+            currentCarbs = 0;
+            updateLiveXE();
+            return;
+        }
+        const filtered = getFullDatabase().filter(item => item.name.toLowerCase().includes(query));
+        showFilteredSuggestions(filtered);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== nameInput && !e.target.classList.contains('category-btn')) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    function renderMeal() {
+        mealListContainer.innerHTML = '';
+        let totalXe = 0;
+
+        currentMeal.forEach((item, index) => {
+            const itemXe = (item.carbs * item.weight) / 100 / CARB_PER_XE;
+            totalXe += itemXe;
+
+            const li = document.createElement('li');
+            li.className = 'meal-item';
+            li.innerHTML = `
+                <span>${item.name} (${item.weight}г) — <b>${itemXe.toFixed(2)} ХЕ</b> <span class="gi-badge ${labelsGI[item.gi].class}">${item.gi === 'slow' ? '🐢' : item.gi === 'medium' ? '🟡' : '⚡'}</span></span>
+                <button class="remove-btn" onclick="removeMealItem(${index})">×</button>
+            `;
+            mealListContainer.appendChild(li);
+        });
+
+        totalXeSpan.textContent = totalXe.toFixed(2);
+    }
+
+    document.getElementById('add-to-meal').addEventListener('click', () => {
+        const name = nameInput.value.trim();
+        const weight = parseFloat(weightInput.value);
+
+        if (!name || isNaN(weight) || weight <= 0 || currentCarbs === 0) {
+            alert('Пожалуйста, выберите продукт из предложенного списка!');
+            return;
+        }
+
+        currentMeal.push({ name, weight, carbs: currentCarbs, gi: currentGI });
+        renderMeal();
+
+        nameInput.value = '';
+        weightInput.value = '';
+        carbsPreview.style.display = 'none';
+        currentCarbs = 0;
+        updateLiveXE();
+    });
+
+    window.removeMealItem = function(index) {
+        currentMeal.splice(index, 1);
+        renderMeal();
+    };
+
+    document.getElementById('clear-meal').addEventListener('click', () => {
+        currentMeal = [];
+        renderMeal();
+    });
+
+    document.getElementById('save-product').addEventListener('click', () => {
+        const name = newNameInput.value.trim();
+        const carbs = parseFloat(newCarbsInput.value);
+        const cat = newCategorySelect.value;
+        const gi = newGiSelect.value;
+
+        if (!name || isNaN(carbs) || carbs < 0) {
+            alert('Введите корректные данные!');
+            return;
+        }
+
+        if (getFullDatabase().some(item => item.name.toLowerCase() === name.toLowerCase())) {
+            alert('Такой продукт уже есть!');
+            return;
+        }
+
+        customDatabase.push({ name, carbs, cat, gi });
+        localStorage.setItem('customFoodDb', JSON.stringify(customDatabase));
+
+        alert(`Продукт "${name}" успешно сохранен!`);
+        newNameInput.value = '';
+        newCarbsInput.value = '';
+    });
+
+    // --- ЛОГИКА ЭКСПОРТА И ИМПОРТА ФАЙЛОВ ---
+    
+    // Экспорт (Скачивание файла)
+    document.getElementById('export-db').addEventListener('click', () => {
+        if (customDatabase.length === 0) {
+            alert('Ваша пользовательская база пуста. Нечего выгружать!');
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customDatabase, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "my_xe_products_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+
+    // Клик по кастомной кнопке активирует скрытый системный input для файла
+    document.getElementById('import-trigger').addEventListener('click', () => {
+        document.getElementById('import-file').click();
+    });
+
+    // Импорт (Чтение загруженного файла)
+    document.getElementById('import-file').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const importedData = JSON.parse(event.target.result);
+                
+                if (Array.isArray(importedData)) {
+                    // Объединяем старую базу с новой без дубликатов по именам
+                    importedData.forEach(newItem => {
+                        if (newItem.name && newItem.carbs !== undefined) {
+                            const isDuplicate = customDatabase.some(item => item.name.toLowerCase() === newItem.name.toLowerCase());
+                            if (!isDuplicate) {
+                                customDatabase.push(newItem);
+                            }
+                        }
+                    });
+                    
+                    localStorage.setItem('customFoodDb', JSON.stringify(customDatabase));
+                    alert('База продуктов успешно импортирована и дополнена!');
+                    e.target.value = ''; // Сброс инпута
+                } else {
+                    alert('Ошибка: Неверный формат данных в файле.');
+                }
+            } catch (err) {
+                alert('Ошибка чтения файла. Убедитесь, что это корректный .json файл.');
+            }
+        };
+        reader.readAsText(file);
+    });
+</script>
+</body>
+</html>
+
+
