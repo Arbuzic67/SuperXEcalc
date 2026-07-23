@@ -127,7 +127,8 @@
     </div>
 </div>
 <script>
-    const defaultDatabase = [
+      const defaultDatabase = [
+        // --- ГАРНИРЫ, ЗЛАКИ И КАШИ ---
         { name: "Гречка отварная", carbs: 25.7, cat: "гарниры", gi: "slow" },
         { name: "Рис отварной белый", carbs: 24.9, cat: "гарниры", gi: "fast" },
         { name: "Рис бурый отварной", carbs: 23.0, cat: "гарниры", gi: "slow" },
@@ -141,6 +142,11 @@
         { name: "Перловая каша отварная", carbs: 22.0, cat: "гарниры", gi: "slow" },
         { name: "Кускус отварной", carbs: 21.8, cat: "гарниры", gi: "medium" },
         { name: "Булгур отварной", carbs: 18.6, cat: "гарниры", gi: "slow" },
+        { name: "Киноа отварная", carbs: 18.5, cat: "гарниры", gi: "slow" },
+        { name: "Полента (кукурузная каша)", carbs: 16.0, cat: "гарниры", gi: "medium" },
+        { name: "Рис дикий отварной", carbs: 21.0, cat: "гарниры", gi: "slow" },
+
+        // --- ХЛЕБ И ВЫПЕЧКА ---
         { name: "Хлеб пшеничный (белый)", carbs: 48.0, cat: "хлеб", gi: "fast" },
         { name: "Хлеб ржаной (черный)", carbs: 40.0, cat: "хлеб", gi: "slow" },
         { name: "Хлеб бородинский", carbs: 42.0, cat: "хлеб", gi: "medium" },
@@ -151,6 +157,11 @@
         { name: "Блины классические", carbs: 30.0, cat: "хлеб", gi: "medium" },
         { name: "Пирожок с капустой", carbs: 41.0, cat: "хлеб", gi: "medium" },
         { name: "Круассан классический", carbs: 46.0, cat: "хлеб", gi: "fast" },
+        { name: "Пита (круглый хлеб)", carbs: 52.0, cat: "хлеб", gi: "fast" },
+        { name: "Чиабатта", carbs: 48.0, cat: "хлеб", gi: "fast" },
+        { name: "Сдобная булочка", carbs: 55.0, cat: "хлеб", gi: "fast" },
+
+        // --- СЛАДОСТИ И ДЕСЕРТЫ ---
         { name: "Сахар-песок / Рафинад", carbs: 99.8, cat: "сладости", gi: "fast" },
         { name: "Мед натуральный", carbs: 80.3, cat: "сладости", gi: "fast" },
         { name: "Шоколад молочный", carbs: 52.4, cat: "сладости", gi: "medium" },
@@ -161,6 +172,22 @@
         { name: "Мороженое пломбир", carbs: 20.0, cat: "сладости", gi: "slow" },
         { name: "Печенье овсяное", carbs: 65.0, cat: "сладости", gi: "medium" },
         { name: "Чипсы картофельные", carbs: 53.0, cat: "сладости", gi: "fast" },
+        { name: "Чизкейк классический", carbs: 30.0, cat: "сладости", gi: "medium" },
+        { name: "Кекс маффин", carbs: 54.0, cat: "сладости", gi: "fast" },
+        { name: "Пончик глазированный", carbs: 49.0, cat: "сладости", gi: "fast" },
+
+        // --- ОВОЩИ И СУХОФРУКТЫ ---
+        { name: "Морковь сырая", carbs: 6.9, cat: "овощи", gi: "slow" },
+        { name: "Свекла отварная", carbs: 10.8, cat: "овощи", gi: "medium" },
+        { name: "Помидор", carbs: 3.8, cat: "овощи", gi: "slow" },
+        { name: "Огурец свежий", carbs: 2.5, cat: "овощи", gi: "slow" },
+        { name: "Перец болгарский", carbs: 5.3, cat: "овощи", gi: "slow" },
+        { name: "Кукуруза консервированная", carbs: 14.5, cat: "овощи", gi: "medium" },
+        { name: "Изюм", carbs: 66.0, cat: "овощи", gi: "medium" },
+        { name: "Курага", carbs: 51.0, cat: "овощи", gi: "slow" },
+        { name: "Брокколи / Цветная капуста", carbs: 4.0, cat: "овощи", gi: "slow" },
+        { name: "Тыква запеченная", carbs: 6.0, cat: "овощи", gi: "fast" },
+        // --- РАСШИРЕННЫЕ ФРУКТЫ И ЯГОДЫ ---
         { name: "Яблоко", carbs: 10.3, cat: "фрукты", gi: "slow" },
         { name: "Банан", carbs: 21.0, cat: "фрукты", gi: "medium" },
         { name: "Груша", carbs: 10.9, cat: "фрукты", gi: "slow" },
@@ -175,20 +202,47 @@
         { name: "Малина", carbs: 8.3, cat: "фрукты", gi: "slow" },
         { name: "Арбуз", carbs: 5.8, cat: "фрукты", gi: "fast" },
         { name: "Дыня", carbs: 7.4, cat: "фрукты", gi: "medium" },
-        { name: "Морковь сырая", carbs: 6.9, cat: "овощи", gi: "slow" },
-        { name: "Свекла отварная", carbs: 10.8, cat: "овощи", gi: "medium" },
-        { name: "Помидор", carbs: 3.8, cat: "овощи", gi: "slow" },
-        { name: "Огурец свежий", carbs: 2.5, cat: "овощи", gi: "slow" },
-        { name: "Перец болгарский", carbs: 5.3, cat: "овощи", gi: "slow" },
-        { name: "Кукуруза консервированная", carbs: 14.5, cat: "овощи", gi: "medium" },
-        { name: "Изюм", carbs: 66.0, cat: "овощи", gi: "medium" },
-        { name: "Курага", carbs: 51.0, cat: "овощи", gi: "slow" },
+        { name: "Черника / Голубика", carbs: 11.0, cat: "фрукты", gi: "slow" },
+        { name: "Ежевика", carbs: 5.3, cat: "фрукты", gi: "slow" },
+        { name: "Смородина черная", carbs: 7.3, cat: "фрукты", gi: "slow" },
+        { name: "Смородина красная", carbs: 7.7, cat: "фрукты", gi: "slow" },
+        { name: "Вишня / Черешня", carbs: 11.5, cat: "фрукты", gi: "slow" },
+        { name: "Крыжовник", carbs: 9.0, cat: "фрукты", gi: "slow" },
+        { name: "Брусника", carbs: 8.2, cat: "фрукты", gi: "slow" },
+        { name: "Клюква свежая", carbs: 4.0, cat: "фрукты", gi: "slow" },
+        { name: "Слива / Алыча", carbs: 9.5, cat: "фрукты", gi: "slow" },
+
+        // --- МОЛОЧНЫЕ ПРОДУКТЫ ---
         { name: "Молоко 2.5% / 3.2%", carbs: 4.7, cat: "молоко", gi: "slow" },
         { name: "Кефир", carbs: 4.0, cat: "молоко", gi: "slow" },
         { name: "Йогурт питьевой сладкий", carbs: 11.5, cat: "молоко", gi: "medium" },
         { name: "Сырок глазированный", carbs: 33.0, cat: "молоко", gi: "medium" },
         { name: "Сок яблочный", carbs: 11.5, cat: "молоко", gi: "fast" },
-        { name: "Кока-Кола (классическая)", carbs: 10.4, cat: "молоко", gi: "fast" }
+        { name: "Кока-Кола (классическая)", carbs: 10.4, cat: "молоко", gi: "fast" },
+        { name: "Йогурт греческий натуральный", carbs: 3.5, cat: "молоко", gi: "slow" },
+        { name: "Сливки 10%", carbs: 4.0, cat: "молоко", gi: "slow" },
+
+        // --- СЛОЖНЫЕ СУПЫ И ВТОРЫЕ БЛЮДА ---
+        { name: "Борщ с мясом", carbs: 5.0, cat: "гарниры", gi: "slow" },
+        { name: "Суп куриный с лапшой", carbs: 6.5, cat: "гарниры", gi: "medium" },
+        { name: "Суп гороховый", carbs: 9.0, cat: "гарниры", gi: "slow" },
+        { name: "Суп-пюре грибной", carbs: 5.5, cat: "гарниры", gi: "medium" },
+        { name: "Щи из свежей капусты", carbs: 4.0, cat: "гарниры", gi: "slow" },
+        { name: "Пельмени отварные", carbs: 29.0, cat: "гарниры", gi: "medium" },
+        { name: "Вареники с картофелем", carbs: 32.0, cat: "гарниры", gi: "medium" },
+        { name: "Вареники с вишней сладкие", carbs: 38.0, cat: "гарниры", gi: "fast" },
+        { name: "Пицца на тонком тесте", carbs: 26.0, cat: "хлеб", gi: "medium" },
+        { name: "Котлета мясная домашняя (с хлебом)", carbs: 10.5, cat: "гарниры", gi: "slow" },
+        { name: "Сырники из творога сладкие", carbs: 14.0, cat: "молоко", gi: "medium" },
+        { name: "Голубцы с мясом и рисом", carbs: 6.2, cat: "овощи", gi: "slow" },
+        { name: "Плов с курицей/свининой", carbs: 26.0, cat: "гарниры", gi: "medium" },
+        { name: "Лазанья мясная", carbs: 22.0, cat: "хлеб", gi: "medium" },
+
+        // --- ФАСТФУД И СНЭКИ ---
+        { name: "Картофель фри", carbs: 38.0, cat: "гарниры", gi: "fast" },
+        { name: "Гамбургер / Бургер", carbs: 26.0, cat: "хлеб", gi: "medium" },
+        { name: "Наггетсы куриные", carbs: 18.0, cat: "гарниры", gi: "medium" },
+        { name: "Сосиска в тесте запеченная", carbs: 29.0, cat: "хлеб", gi: "fast" }
     ];
 
     const CARB_PER_XE = 10;
